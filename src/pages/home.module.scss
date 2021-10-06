@@ -1,1 +1,35 @@
-// TODO
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  height: calc(100vh - 5rem);
+}
+
+.posts {
+  margin: 0;
+}
+
+.post {
+  height: 100px;
+  margin: 2rem 0;
+
+  strong {
+    font-family: 'Inter';
+    color: var(--white);
+    font-size: 28px;
+  }
+
+  p {
+    font-family: 'Inter';
+    color: var(--gray-200);
+    font-size: 28;
+    padding: 8px 0;
+  }
+
+  .postInfo {
+    display: flex;
+    flex-direction: row;
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+}

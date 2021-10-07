@@ -11,12 +11,20 @@
 
 .post {
   height: 100px;
-  margin: 2rem 0;
+
+  &.post + .post {
+    margin: 4rem 0;
+  }
 
   strong {
     font-family: 'Inter';
     color: var(--white);
     font-size: 28px;
+    transition: color 0.5s;
+
+    &:hover {
+      color: var(--pink-500);
+    }
   }
 
   p {
@@ -31,5 +39,27 @@
     flex-direction: row;
     margin-top: 1rem;
     gap: 1rem;
+    color: var(--gray-500);
+  }
+
+  .postInfoItems {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+}
+
+.loadMorePosts {
+  border: none;
+  background-color: transparent;
+
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: var(--pink-500);
+  transition: filter 0.5;
+
+  &:hover {
+    filter: brightness(0.8);
   }
 }

@@ -37,6 +37,43 @@ interface HomeProps {
 
 export default function Home({ postsPagination }: HomeProps) {
   const [posts, setPosts] = useState(postsPagination.results);
+  const [nextPage, setNextPage] = useState(postsPagination.next_page);
+
+  async function loadMorePosts() {
+    const res = await fetch(postsPagination.next_page).then(response =>
+      response.json()
+    );
+
+    const newPosts: Post[] = res.results.map(post => {
+      return {
+        uid: post.slugs[0],
+        first_publication_date: format(
+          new Date(post.first_publication_date),
+          'dd MMM yyyy',
+          {
+            locale: ptBR,
+          }
+        ),
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        },
+      };
+    });
+
+    const allPosts = [...posts];
+
+    newPosts.forEach(elemento => allPosts.push(elemento));
+
+    setPosts(allPosts);
+
+    if (res.next_page === null) {
+      setNextPage(null);
+    } else {
+      setNextPage(res.next_page);
+    }
+  }
 
   return (
     <>
@@ -50,21 +87,34 @@ export default function Home({ postsPagination }: HomeProps) {
               <Link href={`/post/${post.uid}`}>
                 <a>
                   <strong>{post.data.title}</strong>
-                  <p>{post.data.subtitle}</p>
-                  <div className={styles.postInfo}>
-                    <div className={styles.postDate}>
-                      <FiCalendar />
-                      {post.first_publication_date}
-                    </div>
-                    <div className={styles.postAuthor}>
-                      <FiUser />
-                      {post.data.author}
-                    </div>
-                  </div>
                 </a>
               </Link>
+
+              <p>{post.data.subtitle}</p>
+              <div className={styles.postInfo}>
+                <div className={styles.postInfoItems}>
+                  <FiCalendar />
+                  {post.first_publication_date}
+                </div>
+                <div className={styles.postInfoItems}>
+                  <FiUser />
+                  {post.data.author}
+                </div>
+              </div>
             </div>
           ))}
+          {nextPage === null ? (
+            ''
+          ) : (
+            <button
+              type="button"
+              className={styles.loadMorePosts}
+              onClick={() => loadMorePosts()}
+              value="Carregar mais posts"
+            >
+              Carregar mais posts
+            </button>
+          )}
         </div>
       </main>
     </>
@@ -77,7 +127,7 @@ export const getStaticProps: GetStaticProps = async () => {
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
-      pageSize: 20,
+      pageSize: 2,
     }
   );
 

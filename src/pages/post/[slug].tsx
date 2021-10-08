@@ -1,5 +1,8 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
+
+import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 
 import { RichText } from 'prismic-dom';
 import { format } from 'date-fns';
@@ -12,12 +15,14 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 
 interface Post {
+  uid: string;
   first_publication_date: string | null;
   data: {
     title: string;
     banner: {
       url: string;
     };
+    subtitle: string;
     author: string;
     content: {
       heading: string;
@@ -40,7 +45,45 @@ export default function Post({ post }: PostProps) {
   }
   return (
     <>
-      <div>salve</div>
+      <Head>
+        <title>{post.data.title} | Ignews</title>
+      </Head>
+      <img src={post.data.banner.url} alt="" />
+      <main className={styles.container}>
+        <article>
+          <h1>{post.data.title}</h1>
+          <div className={styles.postInfo}>
+            <div className={styles.postInfoItem}>
+              <FiCalendar />
+              <p>
+                {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                  locale: ptBR,
+                })}
+              </p>
+            </div>
+            <div className={styles.postInfoItem}>
+              <FiUser />
+              <p>{post.data.author}</p>
+            </div>
+            <div className={styles.postInfoItem}>
+              <FiClock />
+              <p>4 min</p>
+            </div>
+          </div>
+          {post.data.content.map(content => {
+            return (
+              <article key={content.heading}>
+                <h2>{content.heading}</h2>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: RichText.asHtml(content.body),
+                  }}
+                />
+              </article>
+            );
+          })}
+        </article>
+      </main>
     </>
   );
 }
@@ -62,7 +105,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     paths,
     fallback: true,
   };
-  // TODO
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
@@ -73,18 +115,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const response = await prismic.getByUID('posts', String(slug), {});
 
   const post: Post = {
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
     data: {
-      author: response.data.author,
-      banner: response.data.banner,
       title: response.data.title,
-      content: response.data.content.map(conteudo => {
+      banner: {
+        url: response.data.banner.url,
+      },
+      subtitle: response.data.subtitle,
+      author: response.data.author,
+      content: response.data.content.map(item => {
         return {
-          heading: conteudo.heading,
-          body: [...conteudo.body],
+          heading: item.heading,
+          body: item.body,
         };
       }),
     },
-    first_publication_date: response.first_publication_date,
   };
 
   return {
